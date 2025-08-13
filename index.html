@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Six-Pass Editorial Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-interface {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .editor-section {
+            padding: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        #textInput {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        #textInput:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .pass-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .pass-tab {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+        
+        .pass-tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .pass-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .results-section {
+            margin-top: 30px;
+        }
+        
+        .pass-results {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pass-results.active {
+            display: block;
+        }
+        
+        .violation-item {
+            background: white;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .violation-item.suggestion {
+            border-left-color: #f39c12;
+        }
+        
+        .violation-item.good {
+            border-left-color: #27ae60;
+        }
+        
+        .violation-text {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 8px 0;
+            word-break: break-word;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .pass-tabs {
+                flex-direction: column;
+            }
+            
+            .pass-tab {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Six-Pass Editorial Engine</h1>
+            <p>Mechanical execution of Tom Adelstein's proven editing methodology</p>
+        </div>
+        
+        <div class="main-interface">
+            <div class="editor-section">
+                <div class="input-group">
+                    <label for="textInput">Paste your text here for analysis:</label>
+                    <textarea id="textInput" placeholder="Paste your manuscript text here and click 'Run All Passes' to analyze it through the six-pass system..."></textarea>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="runAllPasses()">Run All Passes</button>
+                    <button class="btn btn-secondary" onclick="clearResults()">Clear Results</button>
+                    <button class="btn btn-secondary" onclick="loadSample()">Load Sample Text</button>
+                </div>
+                
+                <div class="stats" id="statsContainer" style="display: none;">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalViolations">0</div>
+                        <div class="stat-label">Total Violations</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="wordCount">0</div>
+                        <div class="stat-label">Word Count</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="sentenceCount">0</div>
+                        <div class="stat-label">Sentences</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgSentenceLength">0</div>
+                        <div class="stat-label">Avg Sentence Length</div>
+                    </div>
+                </div>
+                
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <div class="pass-tabs">
+                        <button class="pass-tab active" onclick="showPass(1)">Pass 1: Passive Voice</button>
+                        <button class="pass-tab" onclick="showPass(2)">Pass 2: Adverbs</button>
+                        <button class="pass-tab" onclick="showPass(3)">Pass 3: Sentence Length</button>
+                        <button class="pass-tab" onclick="showPass(4)">Pass 4: Modifiers</button>
+                        <button class="pass-tab" onclick="showPass(5)">Pass 5: Voice</button>
+                        <button class="pass-tab" onclick="showPass(6)">Pass 6: Weak Verbs</button>
+                    </div>
+                    
+                    <div id="pass1Results" class="pass-results active"></div>
+                    <div id="pass2Results" class="pass-results"></div>
+                    <div id="pass3Results" class="pass-results"></div>
+                    <div id="pass4Results" class="pass-results"></div>
+                    <div id="pass5Results" class="pass-results"></div>
+                    <div id="pass6Results" class="pass-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPass = 1;
+        let analysisResults = {};
+
+        function showPass(passNumber) {
+            // Update tabs
+            document.querySelectorAll('.pass-tab').forEach((tab, index) => {
+                tab.classList.toggle('active', index === passNumber - 1);
+            });
+            
+            // Update results
+            document.querySelectorAll('.pass-results').forEach((result, index) => {
+                result.classList.toggle('active', index === passNumber - 1);
+            });
+            
+            currentPass = passNumber;
+        }
+
+        function runAllPasses() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('Please enter some text to analyze.');
+                return;
+            }
+
+            // Show progress
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('statsContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            // Simulate processing
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 16.67; // 6 passes
+                document.getElementById('progressFill').style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        performAnalysis(text);
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        function performAnalysis(text) {
+            // Basic text stats
+            const words = text.split(/\s+/).filter(word => word.length > 0);
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            
+            document.getElementById('wordCount').textContent = words.length;
+            document.getElementById('sentenceCount').textContent = sentences.length;
+            document.getElementById('avgSentenceLength').textContent = 
+                sentences.length > 0 ? Math.round(words.length / sentences.length) : 0;
+
+            // Run all passes
+            analysisResults = {
+                pass1: analyzePassiveVoice(text),
+                pass2: analyzeAdverbs(text),
+                pass3: analyzeSentenceLength(text),
+                pass4: analyzeModifiers(text),
+                pass5: analyzeVoice(text),
+                pass6: analyzeWeakVerbs(text)
+            };
+
+            // Calculate total violations
+            let totalViolations = 0;
+            Object.values(analysisResults).forEach(pass => {
+                totalViolations += pass.violations.length;
+            });
+            
+            document.getElementById('totalViolations').textContent = totalViolations;
+
+            // Display results
+            displayResults();
+            
+            // Show sections
+            document.getElementById('statsContainer').style.display = 'grid';
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        function analyzePassiveVoice(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                // Look for "was/were" constructions
+                const passivePatterns = [
+                    /\b(was|were)\s+\w+ed\b/gi,
+                    /\b(was|were)\s+being\b/gi,
+                    /\b(was|were)\s+\w+en\b/gi,
+                    /\b(is|are)\s+\w+ed\b/gi,
+                    /\b(has|have)\s+been\s+\w+ed\b/gi
+                ];
+                
+                passivePatterns.forEach(pattern => {
+                    const matches = trimmed.match(pattern);
+                    if (matches) {
+                        matches.forEach(match => {
+                            violations.push({
+                                text: trimmed,
+                                violation: match,
+                                suggestion: "Ask 'Who performs the action?' and rewrite in active voice",
+                                line: index + 1
+                            });
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Hunt every 'was/were' construction asking 'who performs the action?'" };
+        }
+
+        function analyzeAdverbs(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                // Look for -ly adverbs
+                const adverbPattern = /\b\w+ly\b/gi;
+                const matches = trimmed.match(adverbPattern);
+                
+                if (matches) {
+                    // Filter out common non-adverbs ending in -ly
+                    const exceptions = ['early', 'daily', 'family', 'supply', 'apply', 'reply', 'likely', 'only'];
+                    const realAdverbs = matches.filter(word => 
+                        !exceptions.includes(word.toLowerCase())
+                    );
+                    
+                    realAdverbs.forEach(adverb => {
+                        violations.push({
+                            text: trimmed,
+                            violation: adverb,
+                            suggestion: "Replace adverb + weak verb with stronger verb",
+                            line: index + 1
+                        });
+                    });
+                }
+            });
+            
+            return { violations, description: "Eliminate all '-ly' modifiers that weaken prose energy" };
+        }
+
+        function analyzeSentenceLength(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                const words = trimmed.split(/\s+/).length;
+                if (words > 17) {
+                    violations.push({
+                        text: trimmed,
+                        violation: `${words} words (exceeds 17-word limit)`,
+                        suggestion: "Break into shorter sentences while maintaining flow",
+                        line: index + 1
+                    });
+                }
+            });
+            
+            return { violations, description: "Enforce maximum 17 words per sentence for optimal readability" };
+        }
+
+        function analyzeModifiers(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            // Common redundant modifiers
+            const redundantModifiers = [
+                'very', 'quite', 'rather', 'somewhat', 'really', 'truly', 'actually',
+                'basically', 'literally', 'absolutely', 'completely', 'totally',
+                'extremely', 'incredibly', 'amazing', 'awesome', 'fantastic'
+            ];
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                redundantModifiers.forEach(modifier => {
+                    const pattern = new RegExp(`\\b${modifier}\\b`, 'gi');
+                    if (pattern.test(trimmed)) {
+                        violations.push({
+                            text: trimmed,
+                            violation: modifier,
+                            suggestion: "Remove redundant modifier - does it add new information?",
+                            line: index + 1
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Remove modifiers that don't add information" };
+        }
+
+        function analyzeVoice(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                // Look for third-person or abstract constructions
+                const abstractPatterns = [
+                    /\bit\s+(is|was|can|will|should)\b/gi,
+                    /\bthere\s+(is|are|was|were)\b/gi,
+                    /\bone\s+(can|should|must|will)\b/gi,
+                    /\bpeople\s+(often|usually|typically)\b/gi
+                ];
+                
+                abstractPatterns.forEach(pattern => {
+                    if (pattern.test(trimmed)) {
+                        violations.push({
+                            text: trimmed,
+                            violation: "Abstract or third-person construction",
+                            suggestion: "Convert to first-person narrative: 'I discovered...' or 'I found...'",
+                            line: index + 1
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Maintain first-person narrative throughout" };
+        }
+
+        function analyzeWeakVerbs(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            const weakVerbs = ['is', 'are', 'was', 'were', 'has', 'have', 'had', 'get', 'got', 'make', 'made', 'do', 'did', 'go', 'went'];
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                weakVerbs.forEach(verb => {
+                    const pattern = new RegExp(`\\b${verb}\\b`, 'gi');
+                    if (pattern.test(trimmed)) {
+                        violations.push({
+                            text: trimmed,
+                            violation: verb,
+                            suggestion: "Replace with stronger, more specific verb",
+                            line: index + 1
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Strengthen weak verb constructions" };
+        }
+
+        function displayResults() {
+            Object.keys(analysisResults).forEach((passKey, index) => {
+                const passNum = index + 1;
+                const results = analysisResults[passKey];
+                const container = document.getElementById(`pass${passNum}Results`);
+                
+                let html = `<h3>Pass ${passNum}: ${results.description}</h3>`;
+                
+                if (results.violations.length === 0) {
+                    html += '<div class="violation-item good"><strong>✓ No violations found!</strong><br>This pass is clean.</div>';
+                } else {
+                    html += `<p><strong>${results.violations.length} violations found:</strong></p>`;
+                    
+                    results.violations.forEach(violation => {
+                        html += `
+                            <div class="violation-item">
+                                <strong>Violation:</strong> ${violation.violation}<br>
+                                <div class="violation-text">${violation.text}</div>
+                                <strong>Suggestion:</strong> ${violation.suggestion}
+                            </div>
+                        `;
+                    });
+                }
+                
+                container.innerHTML = html;
+            });
+        }
+
+        function clearResults() {
+            document.getElementById('textInput').value = '';
+            document.getElementById('statsContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            analysisResults = {};
+        }
+
+        function loadSample() {
+            const sampleText = `The research was conducted by the team. They had been working on this project for months. The results were absolutely amazing and very impressive. There were many challenges that had to be overcome during the process. It was really quite difficult to analyze the data properly. The conclusions that were drawn from this study are extremely significant. People often don't realize how complex these experiments actually are. One should always be careful when interpreting scientific results. The methodology that was used in this research is basically sound, but there are some limitations that should be noted.`;
+            
+            document.getElementById('textInput').value = sampleText;
+        }
+    </script>
+</body>
+</html>
