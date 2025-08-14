@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seven-Pass Editorial Engine (New Version)</title>
+    <title>Seven-Pass Editorial Engine</title>
     <style>
         * {
             margin: 0;
@@ -266,7 +266,7 @@
     <div class="container">
         <div class="header">
             <h1>Seven-Pass Editorial Engine</h1>
-            <p>Enhanced methodology with imperative mood conversion (New Version)</p>
+            <p>Enhanced with imperative mood conversion - mechanical execution of Tom Adelstein's proven editing methodology</p>
         </div>
         
         <div class="main-interface">
@@ -315,7 +315,7 @@
                         <button class="pass-tab" onclick="showPass(4)">Pass 4: Modifiers</button>
                         <button class="pass-tab" onclick="showPass(5)">Pass 5: Voice</button>
                         <button class="pass-tab" onclick="showPass(6)">Pass 6: Weak Verbs</button>
-                        <button class="pass-tab" onclick="showPass(7)">Pass 7: Imperative Mood</button>
+                        <button class="pass-tab" onclick="showPass(7)">Pass 7: Imperative</button>
                     </div>
                     
                     <div id="pass1Results" class="pass-results active"></div>
@@ -360,10 +360,10 @@
             document.getElementById('statsContainer').style.display = 'none';
             document.getElementById('resultsSection').style.display = 'none';
 
-            // Simulate processing - 7 passes now
+            // Simulate processing - now 7 passes
             let progress = 0;
             const progressInterval = setInterval(() => {
-                progress += 14.29; // 7 passes (100/7 = 14.29)
+                progress += 14.29; // 7 passes: 100/7 = ~14.29
                 document.getElementById('progressFill').style.width = progress + '%';
                 
                 if (progress >= 100) {
@@ -385,7 +385,7 @@
             document.getElementById('avgSentenceLength').textContent = 
                 sentences.length > 0 ? Math.round(words.length / sentences.length) : 0;
 
-            // Run all passes
+            // Run all 7 passes
             analysisResults = {
                 pass1: analyzePassiveVoice(text),
                 pass2: analyzeAdverbs(text),
@@ -393,7 +393,7 @@
                 pass4: analyzeModifiers(text),
                 pass5: analyzeVoice(text),
                 pass6: analyzeWeakVerbs(text),
-                pass7: analyzeImperativeMood(text)
+                pass7: analyzeImperative(text)
             };
 
             // Calculate total violations
@@ -552,3 +552,123 @@
                 
                 abstractPatterns.forEach(pattern => {
                     if (pattern.test(trimmed)) {
+                        violations.push({
+                            text: trimmed,
+                            violation: "Abstract or third-person construction",
+                            suggestion: "Convert to first-person narrative: 'I discovered...' or 'I found...'",
+                            line: index + 1
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Maintain first-person narrative throughout" };
+        }
+
+        function analyzeWeakVerbs(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            const weakVerbs = ['is', 'are', 'was', 'were', 'has', 'have', 'had', 'get', 'got', 'make', 'made', 'do', 'did', 'go', 'went'];
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                weakVerbs.forEach(verb => {
+                    const pattern = new RegExp(`\\b${verb}\\b`, 'gi');
+                    if (pattern.test(trimmed)) {
+                        violations.push({
+                            text: trimmed,
+                            violation: verb,
+                            suggestion: "Replace with stronger, more specific verb",
+                            line: index + 1
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Strengthen weak verb constructions" };
+        }
+
+        function analyzeImperative(text) {
+            const violations = [];
+            const sentences = text.split(/[.!?]+/);
+            
+            sentences.forEach((sentence, index) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return;
+                
+                // Look for personal action patterns that should be imperative
+                const imperativePatterns = [
+                    /\bI\s+(walked|learned|found|discovered|applied|used|developed|created|built|implemented|eliminated|converted|transformed|achieved)\b/gi,
+                    /\bI\s+(eliminated|removed|stripped|strengthened|maintained|enforced|broke|replaced|questioned)\b/gi,
+                    /\bI\s+(hunt|analyze|look|search|identify|detect|catch|spot)\b/gi
+                ];
+                
+                imperativePatterns.forEach(pattern => {
+                    const matches = trimmed.match(pattern);
+                    if (matches) {
+                        matches.forEach(match => {
+                            // Extract the verb
+                            const verb = match.replace(/^I\s+/, '');
+                            const imperative = verb.charAt(0).toUpperCase() + verb.slice(1);
+                            
+                            violations.push({
+                                text: trimmed,
+                                violation: match,
+                                suggestion: `Convert to imperative: "${imperative}..." (removes braggadocio, creates actionable methodology)`,
+                                line: index + 1
+                            });
+                        });
+                    }
+                });
+            });
+            
+            return { violations, description: "Convert personal actions to imperative mood for actionable methodology" };
+        }
+
+        function displayResults() {
+            Object.keys(analysisResults).forEach((passKey, index) => {
+                const passNum = index + 1;
+                const results = analysisResults[passKey];
+                const container = document.getElementById(`pass${passNum}Results`);
+                
+                let html = `<h3>Pass ${passNum}: ${results.description}</h3>`;
+                
+                if (results.violations.length === 0) {
+                    html += '<div class="violation-item good"><strong>✓ No violations found!</strong><br>This pass is clean.</div>';
+                } else {
+                    html += `<p><strong>${results.violations.length} violations found:</strong></p>`;
+                    
+                    results.violations.forEach(violation => {
+                        html += `
+                            <div class="violation-item">
+                                <strong>Violation:</strong> ${violation.violation}<br>
+                                <div class="violation-text">${violation.text}</div>
+                                <strong>Suggestion:</strong> ${violation.suggestion}
+                            </div>
+                        `;
+                    });
+                }
+                
+                container.innerHTML = html;
+            });
+        }
+
+        function clearResults() {
+            document.getElementById('textInput').value = '';
+            document.getElementById('statsContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            analysisResults = {};
+        }
+
+        function loadSample() {
+            const sampleText = `I developed this methodology through extensive research and testing. I found that systematic application produces consistent results. I recommend starting with foundational principles. The research was conducted by our team and the results were absolutely amazing and very impressive. There were many challenges that had to be overcome during the process. It was really quite difficult to analyze the data properly. I eliminated passive voice constructions and I strengthened weak verbs throughout my manuscript. I applied these principles systematically and I built specialized tools for mechanical tasks.`;
+            
+            document.getElementById('textInput').value = sampleText;
+        }
+    </script>
+</body>
+</html>
