@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seven-Pass Auto-Correction Engine</title>
+    <title>Seven-Pass Auto-Correction Engine - Voice Preserving</title>
     <style>
         * {
             margin: 0;
@@ -216,23 +216,13 @@
             border-left: 3px solid #f39c12;
         }
 
-        .navigation {
-            background: #34495e;
-            padding: 15px 40px;
-            text-align: center;
-        }
-
-        .navigation a {
-            color: #ecf0f1;
-            text-decoration: none;
-            margin: 0 15px;
-            padding: 8px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .navigation a:hover {
-            background-color: #2c3e50;
+        .warning {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
         }
 
         .methodology {
@@ -257,35 +247,6 @@
             color: #555;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                border-radius: 10px;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-            .header {
-                padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .btn {
-                width: 100%;
-                max-width: 300px;
-            }
-        }
-
         .hidden {
             display: none;
         }
@@ -295,10 +256,14 @@
     <div class="container">
         <div class="header">
             <h1>Seven-Pass Auto-Correction Engine</h1>
-            <p>Mechanical execution of Tom Adelstein's proven editorial methodology</p>
+            <p>Voice-preserving mechanical execution of Tom Adelstein's proven editorial methodology</p>
         </div>
 
         <div class="content">
+            <div class="warning">
+                <strong>🔧 Fixed Version:</strong> This version preserves your authentic voice by removing the destructive verb replacements that turned natural language into robotic prose. Only truly weak constructions are targeted.
+            </div>
+
             <div class="tool-section">
                 <h2 class="section-title">Input Text</h2>
                 <div class="textarea-container">
@@ -319,7 +284,7 @@
                 <button class="pass-btn" onclick="runPass(3)">Pass 3: Sentence Length</button>
                 <button class="pass-btn" onclick="runPass(4)">Pass 4: Redundant Modifiers</button>
                 <button class="pass-btn" onclick="runPass(5)">Pass 5: Personal Voice</button>
-                <button class="pass-btn" onclick="runPass(6)">Pass 6: Strengthen Verbs</button>
+                <button class="pass-btn" onclick="runPass(6)">Pass 6: Fix Weak Verbs</button>
                 <button class="pass-btn" onclick="runPass(7)">Pass 7: Imperative Mood</button>
             </div>
 
@@ -335,8 +300,8 @@
 
             <div class="tool-section">
                 <h2 class="section-title">Corrected Text</h2>
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-                    <strong>📝 Formatting Note:</strong> The corrected text preserves your line breaks and spacing but outputs as plain text. You'll need to manually reapply any formatting (bold, italic, headers, etc.) after copying the corrected content.
+                <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #bee5eb;">
+                    <strong>✅ Voice Preserved:</strong> This version maintains your natural conversational tone while fixing mechanical violations. Your authentic voice remains intact.
                 </div>
                 <div class="textarea-container">
                     <textarea id="outputText" readonly placeholder="Corrected text will appear here..."></textarea>
@@ -344,23 +309,17 @@
             </div>
 
             <div class="methodology">
-                <h3>The Seven-Pass Methodology</h3>
+                <h3>The Seven-Pass Methodology (Voice-Preserving)</h3>
                 <ol>
-                    <li><strong>Passive Voice Elimination:</strong> Identify and mark passive constructions for manual review</li>
-                    <li><strong>Adverb Removal:</strong> Automatically remove "-ly" modifiers that weaken prose</li>
+                    <li><strong>Passive Voice Detection:</strong> Identify and mark passive constructions for manual review</li>
+                    <li><strong>Adverb Removal:</strong> Remove "-ly" modifiers that weaken prose (preserves essential ones)</li>
                     <li><strong>Sentence Length Control:</strong> Break sentences over 17 words for optimal readability</li>
                     <li><strong>Redundant Modifier Stripping:</strong> Remove qualifiers that add no information</li>
                     <li><strong>Personal Voice Consistency:</strong> Ensure first-person narrative throughout</li>
-                    <li><strong>Verb Strengthening:</strong> Replace weak constructions with energetic language</li>
+                    <li><strong>Weak Verb Fixing:</strong> Target only genuinely pompous/bureaucratic language</li>
                     <li><strong>Imperative Mood Conversion:</strong> Transform prose into actionable methodology</li>
                 </ol>
             </div>
-        </div>
-
-        <div class="navigation">
-            <a href="https://tomadelstein-blip.github.io/six-pass-editor/">Six-Pass Diagnostic Tool</a>
-            <a href="https://tadelstein.com">Tom Adelstein's Site</a>
-            <a href="https://medium.com/@tom.adelstein/your-digital-editor-how-i-discovered-why-ai-editing-fails-and-built-a-system-that-works">Read the Methodology</a>
         </div>
     </div>
 
@@ -378,61 +337,32 @@
             totalChanges: 0
         };
 
-        // Weak verbs and their stronger alternatives
+        // FIXED: Only target genuinely weak, pompous verbs - preserve natural voice
         const weakVerbs = {
-            'is': 'becomes',
-            'are': 'become', 
-            'was': 'became',
-            'were': 'became',
-            'has': 'possesses',
-            'have': 'possess',
-            'had': 'possessed',
-            'make': 'create',
-            'makes': 'creates',
-            'made': 'created',
-            'get': 'obtain',
-            'gets': 'obtains',
-            'got': 'obtained',
-            'do': 'execute',
-            'does': 'executes',
-            'did': 'executed',
-            'go': 'proceed',
-            'goes': 'proceeds',
-            'went': 'proceeded',
-            'put': 'place',
-            'puts': 'places',
-            'take': 'seize',
-            'takes': 'seizes',
-            'took': 'seized',
-            'give': 'provide',
-            'gives': 'provides',
-            'gave': 'provided',
-            'see': 'observe',
-            'sees': 'observes',
-            'saw': 'observed',
-            'think': 'analyze',
-            'thinks': 'analyzes',
-            'thought': 'analyzed',
-            'know': 'understand',
-            'knows': 'understands',
-            'knew': 'understood',
-            'feel': 'experience',
-            'feels': 'experiences',
-            'felt': 'experienced',
-            'said': 'stated',
-            'says': 'states',
-            'tell': 'inform',
-            'told': 'informed',
-            'use': 'utilize',
-            'used': 'utilized',
-            'show': 'demonstrate',
-            'shows': 'demonstrates',
-            'showed': 'demonstrated',
-            'find': 'discover',
-            'found': 'discovered',
-            'look': 'examine',
-            'looks': 'examines',
-            'looked': 'examined'
+            'utilize': 'use',
+            'facilitate': 'help',
+            'implement': 'do',
+            'commence': 'start',
+            'terminate': 'end',
+            'initiate': 'begin',
+            'endeavor': 'try',
+            'accomplish': 'do',
+            'acquire': 'get',
+            'demonstrate': 'show',
+            'indicate': 'show',
+            'establish': 'set up',
+            'maintain': 'keep',
+            'participate': 'join',
+            'contribute': 'give',
+            'require': 'need',
+            'assist': 'help',
+            'attempt': 'try',
+            'generate': 'create',
+            'purchase': 'buy',
+            'sufficient': 'enough',
+            'numerous': 'many',
+            'additional': 'more',
+            'previous': 'earlier'
         };
 
         // Redundant modifiers to remove
@@ -440,7 +370,9 @@
             'very', 'quite', 'rather', 'really', 'extremely', 'incredibly', 'amazingly', 
             'absolutely', 'completely', 'totally', 'utterly', 'entirely', 'wholly',
             'somewhat', 'fairly', 'pretty', 'kind of', 'sort of', 'a bit', 'a little',
-            'basically', 'essentially', 'actually', 'literally', 'definitely'
+            'basically', 'essentially', 'actually', 'literally', 'definitely',
+            'obviously', 'clearly', 'certainly', 'undoubtedly', 'particularly',
+            'especially', 'specifically', 'precisely'
         ];
 
         function runPass(passNumber) {
@@ -470,7 +402,7 @@
                     currentText = ensurePersonalVoice(currentText);
                     break;
                 case 6:
-                    currentText = strengthenVerbs(currentText);
+                    currentText = fixWeakVerbs(currentText);
                     break;
                 case 7:
                     currentText = convertToImperative(currentText);
@@ -507,7 +439,7 @@
             currentText = shortenSentences(currentText);
             currentText = removeRedundantModifiers(currentText);
             currentText = ensurePersonalVoice(currentText);
-            currentText = strengthenVerbs(currentText);
+            currentText = fixWeakVerbs(currentText);
             currentText = convertToImperative(currentText);
 
             document.getElementById('outputText').value = currentText;
@@ -519,6 +451,13 @@
             
             // Detect passive voice patterns
             result = result.replace(/\b(was|were|is|are|am|be|been|being)\s+(\w+ed)\b/gi, (match, auxVerb, pastParticiple) => {
+                // Skip common exceptions that aren't passive voice
+                if (pastParticiple.toLowerCase() === 'used' || 
+                    pastParticiple.toLowerCase() === 'based' ||
+                    pastParticiple.toLowerCase() === 'focused') {
+                    return match;
+                }
+                
                 stats.passiveVoiceFixed++;
                 changes.push(`Pass 1 - Passive voice detected: "${match}"`);
                 return `[PASSIVE: ${match} - convert to active voice]`;
@@ -530,8 +469,16 @@
         function removeAdverbs(text) {
             let result = text;
             
-            // Keep essential adverbs
-            const keepAdverbs = ['early', 'daily', 'monthly', 'yearly', 'quarterly', 'supply', 'family', 'holy', 'only', 'likely', 'timely'];
+            // Keep essential adverbs that are necessary for meaning
+            const keepAdverbs = [
+                'early', 'daily', 'monthly', 'yearly', 'quarterly', 'weekly',
+                'supply', 'family', 'holy', 'only', 'likely', 'timely',
+                'hardly', 'nearly', 'barely', 'mostly', 'usually', 'always',
+                'never', 'often', 'sometimes', 'rarely', 'frequently',
+                'immediately', 'suddenly', 'gradually', 'slowly', 'quickly',
+                'directly', 'indirectly', 'recently', 'currently', 'previously',
+                'finally', 'initially', 'eventually', 'instantly'
+            ];
             
             result = result.replace(/\b\w+ly\b/g, (match) => {
                 if (keepAdverbs.includes(match.toLowerCase())) {
@@ -543,7 +490,7 @@
                 return '';
             });
 
-            // Only clean up multiple spaces between words, preserve all line breaks
+            // Clean up extra spaces
             result = result.replace(/([^\n\r]) {2,}([^\n\r])/g, '$1 $2');
             
             return result;
@@ -551,25 +498,29 @@
 
         function shortenSentences(text) {
             let result = text;
-            const sentences = result.split(/[.!?]+/);
+            const sentences = result.split(/([.!?]+)/);
             
             let newSentences = [];
-            sentences.forEach(sentence => {
-                const words = sentence.trim().split(/\s+/);
-                if (words.length > 17 && sentence.trim()) {
-                    stats.sentencesShortened++;
-                    changes.push(`Pass 3 - Long sentence (${words.length} words): "${sentence.trim().substring(0, 50)}..."`);
-                    
-                    // Simple sentence splitting at conjunctions
-                    let splitSentence = sentence.replace(/,\s+(and|but|or|yet|so)\s+/gi, '. $1 ');
-                    newSentences.push(splitSentence);
-                } else {
-                    newSentences.push(sentence);
+            for (let i = 0; i < sentences.length; i += 2) {
+                const sentence = sentences[i];
+                const punctuation = sentences[i + 1] || '';
+                
+                if (sentence && sentence.trim()) {
+                    const words = sentence.trim().split(/\s+/);
+                    if (words.length > 17) {
+                        stats.sentencesShortened++;
+                        changes.push(`Pass 3 - Long sentence (${words.length} words): "${sentence.trim().substring(0, 50)}..."`);
+                        
+                        // Split at logical points
+                        let splitSentence = sentence.replace(/,\s+(and|but|or|yet|so|because|since|while|although|though|however)\s+/gi, '$1 ');
+                        newSentences.push(splitSentence + punctuation);
+                    } else {
+                        newSentences.push(sentence + punctuation);
+                    }
                 }
-            });
+            }
             
-            result = newSentences.join('.').replace(/\.\./g, '.');
-            return result;
+            return newSentences.join('');
         }
 
         function removeRedundantModifiers(text) {
@@ -584,7 +535,7 @@
                 });
             });
 
-            // Only clean up multiple spaces between words, preserve all line breaks
+            // Clean up extra spaces
             result = result.replace(/([^\n\r]) {2,}([^\n\r])/g, '$1 $2');
             return result;
         }
@@ -592,13 +543,13 @@
         function ensurePersonalVoice(text) {
             let result = text;
             
-            // Convert third person to first person
+            // Convert third person to first person (minimal changes)
             const conversions = [
                 ['the author', 'I'],
-                ['one can', 'I can'],
-                ['it is possible to', 'I can'],
-                ['people should', 'you should'],
-                ['one should', 'you should']
+                ['one can see', 'I see'],
+                ['it is possible to see', 'I see'],
+                ['one should note', 'note'],
+                ['it should be noted', 'note']
             ];
 
             conversions.forEach(([from, to]) => {
@@ -613,16 +564,17 @@
             return result;
         }
 
-        function strengthenVerbs(text) {
+        function fixWeakVerbs(text) {
             let result = text;
             
+            // FIXED: Only replace genuinely pompous/bureaucratic language
             Object.keys(weakVerbs).forEach(weakVerb => {
                 const strongVerb = weakVerbs[weakVerb];
                 const regex = new RegExp(`\\b${weakVerb}\\b`, 'gi');
                 
                 result = result.replace(regex, (match) => {
                     stats.verbsStrengthened++;
-                    changes.push(`Pass 6 - Strengthened verb: "${match}" → "${strongVerb}"`);
+                    changes.push(`Pass 6 - Simplified: "${match}" → "${strongVerb}"`);
                     return strongVerb;
                 });
             });
@@ -633,21 +585,20 @@
         function convertToImperative(text) {
             let result = text;
             
-            // Convert "You should" to imperative
+            // Convert wordy constructions to direct commands
             const imperativeConversions = [
-                ['you should ', ''],
-                ['you can ', ''],
-                ['you need to ', ''],
-                ['you must ', ''],
-                ['it is important to ', ''],
-                ['make sure to ', '']
+                ['you should try to ', ''],
+                ['you need to make sure to ', ''],
+                ['it is important to remember to ', ''],
+                ['make sure that you ', ''],
+                ['be sure to ', '']
             ];
 
             imperativeConversions.forEach(([from, to]) => {
                 const regex = new RegExp(from, 'gi');
                 result = result.replace(regex, (match) => {
                     stats.imperativeConverted++;
-                    changes.push(`Pass 7 - Imperative mood: "${match}" → "${to}"`);
+                    changes.push(`Pass 7 - Imperative: "${match}" → "${to}"`);
                     return to;
                 });
             });
@@ -683,7 +634,7 @@
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">${stats.verbsStrengthened}</span>
-                    <div class="stat-label">Verbs Strengthened</div>
+                    <div class="stat-label">Verbs Simplified</div>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">${stats.personalVoiceFixed}</span>
@@ -748,7 +699,7 @@
         }
 
         function loadSample() {
-            const sampleText = `I was really very excited to completely share this absolutely amazing discovery. The research that was conducted by scientists definitely shows that people should basically try to essentially understand what was found. This extremely important finding will totally revolutionize how we actually think about the incredibly complex process that was previously quite mysterious.`;
+            const sampleText = `I was really very excited to completely demonstrate this absolutely amazing discovery. The research that was conducted by scientists definitely shows that people should basically try to essentially utilize what was found. This extremely important finding will totally revolutionize how we actually think about the incredibly complex process that was previously quite mysterious.`;
             
             document.getElementById('inputText').value = sampleText;
         }
